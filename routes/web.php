@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\GlobalProductController;
+use App\Http\Controllers\StockTransferController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -83,6 +86,30 @@ Route::middleware(['auth'])->group(function () {
         // Route::get('/', [App\Http\Controllers\ProductController::class, 'index'])->name('index');
     });
 
+    Route::group(['prefix' => 'shopify', 'as' => 'shopify.', 'middleware' => 'auth'], function () {
+        Route::group(['prefix' => 'products', 'as' => 'products'], function(){
+            Route::get('/', [App\Http\Controllers\ShopifyController::class, 'index'])->name('index');
+        });
+    });
+
+    Route::group(['prefix'=> 'global_product', 'as'=>'global_product.', 'middleware'=>'auth'], function (){
+        Route::get('/add', function(){
+            return view('dashboard.global_product.index');
+        })->name('index');
+
+        Route::post('/save', [GlobalProductController::class, 'save'])->name('save');
+    });
+
+    Route::group(['prefix'=> 'transfer_product', 'as'=>'transfer_product.', 'middleware'=>'auth'], function (){
+        Route::get('/', [StockTransferController::class, 'index'])->name('index');
+
+        Route::get('/from_woo', [StockTransferController::class, 'from_woo'])->name('from_woo');
+        Route::get('/from_shopify', [StockTransferController::class, 'from_shopify'])->name('from_shopify');
+        Route::get('/from_woo/{id}', [StockTransferController::class, 'from_woo_detail'])->name('from_woo_detail');
+        Route::get('/from_shopify/{id}', [StockTransferController::class, 'from_shopify_detail'])->name('from_shopify_detail');
+        Route::post('/from_woo/save', [StockTransferController::class, 'from_woo_save'])->name('from_woo_save');
+        Route::post('/from_shopify/save', [StockTransferController::class, 'from_shopify_save'])->name('from_shopify_save');
+    });
 
     Route::group(['prefix' => 'categories', 'as' => 'categories.', 'middleware' => 'auth'], function () {
         Route::get('/import', [App\Http\Controllers\CategoryController::class, 'import'])->name('import');
